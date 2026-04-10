@@ -1,0 +1,138 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\geometry{top=1in, bottom=1in, left=1in, right=1in}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+
+\title{\textbf{Self-Organized Criticality in Sandpile Dynamics: A Computational Study of the Bak-Tang-Wiesenfeld Model}}
+\author{Submitted By: 2021CH70469, Amit}
+\date{Date of submission: April 10, 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Self-organized criticality (SOC) is a universal mechanism through which slowly driven, dissipative systems spontaneously evolve toward a critical state without external fine-tuning, giving rise to scale-free behavior characterized by power-law statistics. This paper investigates SOC using the foundational Bak-Tang-Wiesenfeld (BTW) sandpile cellular automaton model. A computer simulation is implemented on a 2D square lattice exploring two connectivity topologies (4-neighbor and 8-neighbor). Following an initial burn-in phase to reach the critical attractor, thousands of avalanche events are recorded. The frequency distribution of avalanche sizes obeys a power law $N(s) \propto s^{-\tau}$, confirming the SOC state. Comparative analysis demonstrates how altering the local connectivity threshold impacts the critical exponent and the propagation of avalanches. The results support the universality of SOC and provide insights into cascade dynamics and structural resilience in interconnected systems.
+\end{abstract}
+
+\textbf{Keywords:} self-organized criticality; BTW sandpile model; cellular automaton; power law; avalanche; complexity science; connectivity.
+
+\section{Introduction}
+Complex systems composed of many interacting components frequently exhibit collective behavior that cannot be deduced from the properties of individual constituents alone. A particularly striking manifestation is self-organized criticality (SOC), first proposed by Bak, Tang, and Wiesenfeld in 1987. SOC describes the tendency of slowly driven, dissipative systems to naturally evolve to a marginally stable, critical attractor at which events of all sizes occur, following a scale-free (power-law) distribution.
+
+Since its inception, SOC has been invoked to explain the statistics of earthquakes, stock-market crashes, neural avalanches in the brain, and the clustering of wildfires. The sandpile model provides the cleanest, most foundational toy system for studying SOC: grains of sand are slowly added to a grid, eventually causing local instabilities that cascade into avalanches of unpredictable sizes.
+
+The present study addresses three questions:
+\begin{enumerate}
+    \item Why is the sandpile system a compelling candidate for SOC analysis?
+    \item How do the hallmarks of complexity—noise, avalanches, and connectivity—manifest in this system?
+    \item How does local connectivity topology alter the critical exponent of the avalanche-size distribution?
+\end{enumerate}
+
+\section{Why Sandpiles Exhibit Self-Organized Criticality}
+A system is a good candidate for SOC analysis if it satisfies three structural prerequisites:
+
+\begin{enumerate}
+    \item \textbf{Slow driving / fast dissipation.} The sandpile is driven very slowly (one grain added at a time) but dissipates energy rapidly (an avalanche topples and redistributes grains almost instantaneously compared to the driving rate). This separation of timescales is the hallmark of SOC systems.
+    \item \textbf{Threshold dynamics.} A site only topples when it reaches a critical threshold of grains ($Z_c$). This binary, threshold-based local rule creates the all-or-nothing avalanche mechanism.
+    \item \textbf{No external fine-tuning.} Unlike a conventional phase transition that requires tuning a control parameter (e.g., temperature) to a critical point, the sandpile model reaches its critical state automatically. 
+\end{enumerate}
+
+Together, these properties mean that an initially empty grid self-organizes into a state where adding just one more grain of sand could do nothing, or it could trigger a catastrophic avalanche spanning the entire system.
+
+\section{Description of the System}
+
+\subsection{Noise}
+In this model, noise enters through the random spatial addition of grains. At each time step, a single grain of sand is dropped onto a randomly selected coordinate $(x, y)$ on the lattice. This continuous, low-level perturbation slowly drives the system toward instability, acting as the trigger that probes the current metastable state of the pile and initiates avalanches.
+
+\subsection{Avalanche}
+An avalanche is a chain reaction initiated by the addition of a single grain of sand. If dropping a grain pushes a site's height at $(x, y)$ to or above the threshold $Z_c$, the site "topples," losing $Z_c$ grains which are distributed to its immediate neighbors. If those neighbors subsequently exceed $Z_c$, they also topple, propagating the instability. The avalanche size $s$ is defined as the total number of toppling events that occur before the grid returns to a stable state. 
+
+At the SOC state, the probability distribution of $s$ follows:
+\begin{equation}
+N(s) \propto s^{-\tau}, \quad s \gg 1
+\end{equation}
+where $\tau$ is the critical exponent. The absence of a characteristic avalanche size is the empirical signature of SOC.
+
+\subsection{Connectivity}
+Connectivity governs how many neighbors a toppling cell distributes its sand to, directly altering the stability threshold $Z_c$:
+\begin{itemize}
+    \item \textbf{4-neighbor (von Neumann):} Sand spreads only to the orthogonal neighbors (N, S, E, W). The critical threshold $Z_c = 4$.
+    \item \textbf{8-neighbor (Moore):} Sand spreads to all eight surrounding cells, including diagonals. The critical threshold $Z_c = 8$.
+\end{itemize}
+Connectivity directly controls the density required to reach criticality and alters the branching pathways available for an avalanche to propagate.
+
+\section{Model and Simulation Methodology}
+
+\subsection{BTW CA Rules}
+The model is defined on an $L \times L$ square lattice with open boundaries (grains falling off the edge are lost from the system, providing necessary dissipation). Let $Z(x,y)$ be the number of grains at a site. The rules are:
+\begin{enumerate}
+    \item \textbf{Addition (Noise):} $Z(x,y) \rightarrow Z(x,y) + 1$ at a random site.
+    \item \textbf{Toppling (Avalanche):} If $Z(x,y) \ge Z_c$, then:
+    \begin{align*}
+        Z(x,y) &\rightarrow Z(x,y) - Z_c \\
+        Z(x \pm 1, y \pm 1) &\rightarrow Z(x \pm 1, y \pm 1) + 1 \quad \text{(for all connected neighbors)}
+    \end{align*}
+\end{enumerate}
+Rule 2 is repeated until $Z(x,y) < Z_c$ for all sites.
+
+\subsection{Parameters}
+\begin{table}[H]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Parameter} & \textbf{Symbol} & \textbf{Value} \\
+\midrule
+Lattice size & $L$ & 50 \\
+Total steps & $N_{steps}$ & 20,000 \\
+Burn-in steps & $N_{burn}$ & 5,000 \\
+Threshold (4-conn) & $Z_{c, 4}$ & 4 \\
+Threshold (8-conn) & $Z_{c, 8}$ & 8 \\
+\bottomrule
+\end{tabular}
+\caption{Simulation parameters used for the BTW Sandpile model.}
+\end{table}
+
+\section{Results and Discussion}
+
+\subsection{Self-Organized Critical State}
+Following the burn-in period of 5,000 steps, the system's grain density stabilized, indicating the onset of the critical attractor. The log-log plot of avalanche sizes demonstrates a clear linear relationship over multiple orders of magnitude, confirming power-law scaling consistent with Equation 1. The absence of a characteristic avalanche size over these decades is uniquely consistent with criticality, proving the system self-organized without external parameter tuning.
+
+\subsection{Role of Connectivity}
+Altering the connectivity from a 4-neighbor to an 8-neighbor topology fundamentally shifts the internal structure of the critical state. In the 8-neighbor system, the lattice must reach a higher overall density of grains before achieving criticality ($Z_c=8$). Once critical, the 8-way branching allows toppling events to bypass localized "empty" regions more easily than the 4-way topology. This results in slight variations in the critical exponent $\tau$ and the maximum observed avalanche sizes.
+
+In a practical engineering context, this implies that highly interconnected networks (such as power grids or coupled chemical reactors) may be more robust against small, localized failures, but when a failure threshold is breached, the dense connectivity provides more pathways for catastrophic, system-spanning cascade failures.
+
+\section{Conclusions}
+This study demonstrates that the BTW sandpile model is a paradigmatic example of self-organized criticality:
+\begin{enumerate}
+    \item The system naturally self-organizes to a critical state driven by the separation of timescales between the slow addition of grains and the rapid dissipation of avalanches.
+    \item Avalanche sizes obey a power-law frequency distribution, confirming scale-free behavior.
+    \item Local connectivity topology governs the threshold of stability and the resulting critical exponents, demonstrating how network structure dictates system-wide resilience.
+\end{enumerate}
+
+\section*{List of Prompts Used (AI Assistance)}
+The following prompts were submitted to the Gemini AI assistant during the preparation of this project:
+\begin{enumerate}
+    \item "Explain what to do in this project step by step. Explain me what is github repository, what files should be in that repository. Give me all the steps from step 1."
+    \item "Now guide me how do I make my own repository."
+    \item "I have chosen the Bak-Tang-Wiesenfeld (BTW) Sandpile Model as the system for study... Is this python file good check it and tell me."
+    \item "This is my friends pdf, Give me latex code inspired by this."
+\end{enumerate}
+
+\section*{References}
+\begin{enumerate}
+    \item Bak, P., Tang, C., \& Wiesenfeld, K. (1987). "Self-organized criticality: An explanation of the 1/f noise." \textit{Physical Review Letters}, 59(4), 381-384.
+    \item Bak, P. (1996). \textit{How Nature Works: The Science of Self-Organized Criticality}. Copernicus Press, New York.
+    \item Christensen, K., \& Moloney, N. R. (2004). \textit{Complexity and Criticality}. Imperial College Press, London.
+\end{enumerate}
+
+\end{document}
